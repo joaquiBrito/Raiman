@@ -1,9 +1,6 @@
 package Servicio;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Conteo {
     public HashMap robarCarta(HashMap<String, HashMap<String, List<Integer>>> Mazo, String palo, String carta) {
@@ -22,35 +19,44 @@ public class Conteo {
     public void probabilidad(HashMap<String, HashMap<String, List<Integer>>> Mazo, int puntaje) {
         int puntajeMaximo = 21;
         int puntajeNecesario = puntajeMaximo - puntaje;
-
-        Map<Integer, Integer> puntajesRepetidos = new HashMap<>();
+        Map<String, Integer> cartasRepetidas = new HashMap<>();
         List<Integer> posiblesPuntajes = new ArrayList<>();
-        HashMap<String, List<Integer>> CartasYPuntos;
+        HashMap<String, Double> ProbabilidadPorCarta = new HashMap<>();
+        double probabilidaCarta;
         for (Map.Entry<String, HashMap<String, List<Integer>>> palo : Mazo.entrySet()) {
             HashMap<String, List<Integer>> cartas = palo.getValue();
             for (Map.Entry<String, List<Integer>> carta : cartas.entrySet()) {
 
                 String nombreCarta = carta.getKey();
                 List<Integer> valores = carta.getValue();
-                System.out.println("carta:" + carta);
                 for (int valor : valores) {
-                    if (valor <= puntajeNecesario) {
+                    if (nombreCarta.equals("As")) {
+                        // Si el As puede sumarte 11 sin pasarte, úsalo como 11, de lo contrario úsalo como 1
+                        if (puntaje + 11 <= puntajeMaximo) {
+                            valor = 11;
+                        } else {
+                            valor = 1;
+                        }
+                    }
 
+                    if (valor <= puntajeNecesario) {
+                        cartasRepetidas.put(nombreCarta, cartasRepetidas.getOrDefault(nombreCarta, 0) + 1);
                         posiblesPuntajes.add(valor);
-                        puntajesRepetidos.put(valor, puntajesRepetidos.getOrDefault(valor, 0) + 1);
                     }
                 }
             }
 
         }
-        System.out.println("cantidad de cartas :" + posiblesPuntajes.size());
-        System.out.println("cantidad de cartas: " + contarCartas(Mazo));
-        double probabilidad = (((double) posiblesPuntajes.size()) / contarCartas(Mazo)) * 100;
-        System.out.println("la probabilidad de no pasarme de 21 del  " + probabilidad + "%");
-        System.out.println("Posibles puntajes que suman al puntaje necesario: " + posiblesPuntajes);
-        System.out.println("Repeticiones de puntajes:");
-        for (Map.Entry<Integer, Integer> entry : puntajesRepetidos.entrySet()) {
-            System.out.println("Puntaje: " + entry.getKey() + ", Repeticiones: " + entry.getValue());
+        double probabilidadDeNoPasrDe21 = (((double) posiblesPuntajes.size()) / contarCartas(Mazo)) * 100;
+        for (Map.Entry<String, Integer> entry : cartasRepetidas.entrySet()) {
+            probabilidaCarta = ((double) (entry.getValue()) / contarCartas(Mazo)) * 100;
+            ProbabilidadPorCarta.put(entry.getKey(),probabilidaCarta);
+
+
+        }
+        System.out.println("la probabilidad de no pasarme de 21 del  " + probabilidadDeNoPasrDe21 + "%");
+        for (Map.Entry<String, Double> entry : ProbabilidadPorCarta.entrySet()) {
+            System.out.println("Carta: " + entry.getKey() + ", Probabilidad De Salir: " + entry.getValue() + "%");
         }
     }
 
@@ -60,7 +66,6 @@ public class Conteo {
             HashMap<String, List<Integer>> cartas = palo.getValue();
             totalCartas += cartas.size();
         }
-
         return totalCartas;
     }
 }

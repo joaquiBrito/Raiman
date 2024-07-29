@@ -29,6 +29,6 @@ public class Main {
         Conteo c = new  Conteo();
 
 
-        c.probabilidad(Mazo, 10);
+        c.probabilidad(Mazo, 20);
     }
 }
